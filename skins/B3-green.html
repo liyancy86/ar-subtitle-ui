@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>旅行同传 · 皮肤 B3 · 白底青字</title>
+<style>
+/* ─────────────────────────────────────────────────────────────
+   基础原型 v3（2026-11-04 02:57 追加要求）
+   1 英语字幕两侧同时出，中文译文因翻译延时落后；眼镜端与手机同步（有线，无延时）
+   2 对方那半边的字幕诞生即朝对方方向，不存在「先朝我们再翻过去」
+   3 底部亮点紧跟状态提示语，不在「眼镜未连接」右边
+   4 旧句左对齐；尺寸逐行 80%→50% 非线性（先快后慢），英/中各算一行
+   5 眼镜端 1/2 屏宽、中文再小 1/4、块左右居中而文字左对齐、下移后与新句左对齐
+   ───────────────────────────────────────────────────────────── */
+:root{
+  --bg:#0B0B0D;
+  --ink:#F5F5F7;
+  --dim:#8E8E93;
+  --hair:rgba(255,255,255,.13);
+  --yellow:#FFD60A;          /* 中文回合（我们说，对方听） */
+  --blue:#0A84FF;            /* 英语回合（对方说，我们看） */
+  --alert:#FF453A;
+
+  --zh:28px;                 /* 我方中文主行 */
+  --en:17px;                 /* 我方英文副行 = 0.62 × 28 */
+  --roll:260ms;
+
+  --pad-x:24px;
+  --pad-line:8px;            /* 靠分界线那侧只留一点点空隙 */
+  --fade-line:18px;          /* 撞线渐隐带 */
+
+  --g-zh:12.8px;             /* 眼镜中文 = 17 × 0.75（再小四分之一） */
+  --g-en:8px;                /* 眼镜英文 = 中文 × 0.62 */
+  --g-width:279px;           /* 眼镜屏 558 的 1/2：超过就换行 */
+  /* 长得很像苹果的字族：iPhone 上就是 SF Pro，Windows 上退 Segoe UI / Inter */
+  --sf:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter",
+       "Helvetica Neue","Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#17171A;color:#C9C9CE;
+  font:14px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+body{display:flex;gap:28px;padding:34px 30px 44px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+
+/* ── 手机 ───────────────────────────────────────────── */
+.phone{width:390px;height:844px;flex:0 0 auto;position:relative;
+  background:var(--bg);border:10px solid #1D1D20;border-radius:44px;overflow:hidden;
+  display:flex;flex-direction:column;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+
+/* 顶部那行：对方那侧的底部，与我方底部中心对称 */
+.cap{flex:0 0 auto;display:flex;align-items:center;gap:7px;
+  padding:15px var(--pad-x) 0;font:400 12px/1.4 -apple-system,"PingFang SC",system-ui,sans-serif;
+  color:#A8A8AE;letter-spacing:.01em}
+.cap-other{padding:0 var(--pad-x) 15px;transform:rotate(180deg)}
+.cap .dot{flex:0 0 auto;width:7px;height:7px;border-radius:50%;transition:background .3s,box-shadow .3s}
+
+.pane{flex:1 1 0;min-height:0;position:relative;overflow:hidden;
+  display:flex;flex-direction:column}
+/* 对方半边（上半）：只有英文 */
+.pane-other{justify-content:flex-start;padding:6px var(--pad-x) var(--pad-line);
+  -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - var(--fade-line)),transparent 100%);
+          mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - var(--fade-line)),transparent 100%)}
+/* 我方半边（下半）：中文大字 + 英文小字 */
+.pane-mine{justify-content:flex-end;padding:var(--pad-line) var(--pad-x) 6px;
+  -webkit-mask-image:linear-gradient(to top,#000 0,#000 calc(100% - var(--fade-line)),transparent 100%);
+          mask-image:linear-gradient(to top,#000 0,#000 calc(100% - var(--fade-line)),transparent 100%)}
+
+.turn{display:block}
+
+/* 一行一个字幕。缩放锚点在「文字起始的那一侧」，所以缩小后仍与新句左对齐 */
+.row{display:block;padding-top:7px;transform-origin:left center;
+  transition:transform var(--roll) cubic-bezier(.22,.9,.25,1),
+             opacity   var(--roll) ease,
+             margin    var(--roll) cubic-bezier(.22,.9,.25,1);
+  will-change:transform,opacity}
+.pane-other .row{transform-origin:right center}      /* 倒转后，local 右边 = 视觉左边 = 他们的起始侧 */
+.flip{display:block;transform:rotate(180deg)}        /* 出生即朝对方，不存在“翻过去”这一帧 */
+
+.pane-mine  .row.zh{font-size:var(--zh);line-height:1.32;font-weight:700;
+  letter-spacing:-.02em;color:var(--ink);text-align:left}
+.pane-mine  .row.en{font-size:var(--en);line-height:1.42;color:var(--dim);
+  text-align:left;padding-top:4px}
+.pane-other .row{font-size:var(--zh);line-height:1.3;font-weight:700;
+  letter-spacing:-.01em;color:var(--ink);text-align:left}
+
+/* 流式光标：宽度 0（完全不参与排版、不挤字、不改变折行），
+   竖线画在插入点(= 下一个字的方格左边)。对方那侧整块转了 180°，
+   竖线因此自动落到「靠近已有字」的那一边，不用另写一套。 */
+.caret{display:inline-block;width:0;height:1em;vertical-align:-.16em;position:relative}
+.caret::before{content:"";position:absolute;left:0;top:0;width:.06em;min-width:1.4px;height:100%;
+  background:currentColor;animation:blink 1s steps(1) infinite}
+/* 对方那侧整块转了 180°，插入点右移 2px 在视觉上会甩到「背着字」的一侧；
+   把竖线挂到 left:auto/right:0，翻过来后就贴住已有字（Ranger 03:17 定的） */
+.pane-other .caret::before{left:auto;right:0}
+
+/* 分界线：发丝虚线 + 中心活点 */
+.divider{flex:0 0 auto;height:1px;margin:0 18px;position:relative;
+  background-image:linear-gradient(to right,var(--hair) 0 4px,transparent 4px 8px);
+  background-size:8px 1px;background-repeat:repeat-x}
+.divider i{position:absolute;left:50%;top:-2.5px;width:6px;height:6px;border-radius:50%;
+  background:#55555C;transform:translateX(-50%);transition:background .3s,box-shadow .3s}
+
+/* 底部一行小字：状态 + 亮点 + 右端异常 */
+.footer{flex:0 0 auto;display:flex;align-items:center;gap:8px;
+  padding:15px var(--pad-x) 17px;font:400 11.5px/1.4 -apple-system,"PingFang SC",system-ui,sans-serif;
+  color:#8A8A90;letter-spacing:.01em}
+.footer .r{margin-left:auto}
+.footer .dot{flex:0 0 auto;width:7px;height:7px;border-radius:50%;transition:background .3s,box-shadow .3s}
+.footer.alert{color:var(--alert)}
+.footer.alert .r{color:var(--alert)}
+
+/* 三处亮点同色：中文回合黄 / 英语回合蓝 */
+.dot{background:#55555C}
+body[data-turn="zh"] .dot{background:var(--yellow);box-shadow:0 0 0 3px rgba(255,214,10,.15)}
+body[data-turn="en"] .dot{background:var(--blue);box-shadow:0 0 0 3px rgba(10,132,255,.18)}
+body[data-turn="zh"] .divider i{background:var(--yellow);box-shadow:0 0 0 3px rgba(255,214,10,.15)}
+body[data-turn="en"] .divider i{background:var(--blue);box-shadow:0 0 0 3px rgba(10,132,255,.18)}
+
+/* ── 眼镜屏 558×314 ────────────────────────────────── */
+.glasses{width:558px;flex:0 0 auto;aspect-ratio:16/9;background:#08080A;border:1px solid #222;
+  overflow:hidden;position:relative;display:flex;flex-direction:column;
+  box-shadow:0 18px 50px rgba(0,0,0,.45)}
+/* ── 眼镜 HUD：V1 票根那套的四件（时间电量 / MEMO / GLOSSARY），按 03:27 要求挪位 ── */
+.g-hud{position:absolute;left:16px;top:12px;display:flex;align-items:center;gap:7px;
+  font-family:var(--sf);font-size:12px;font-weight:500;color:#A0A0A6;
+  letter-spacing:.01em;font-variant-numeric:tabular-nums}
+/* 电池：抄苹果，圆角外框 + 右侧触点 + 内部电量块，不显示百分比 */
+.g-batt{position:relative;width:19px;height:10px;border:1.2px solid #7E7E85;border-radius:3px}
+.g-batt::after{content:"";position:absolute;right:-3.4px;top:2.6px;width:2px;height:3.6px;
+  border-radius:0 1px 1px 0;background:#7E7E85}
+.g-batt i{position:absolute;left:1.4px;top:1.4px;bottom:1.4px;width:72%;
+  border-radius:1.4px;background:#D6D6DB}
+
+/* MEMO / GLOSSARY：从 V1 的 14px 下移约两个电量标高度（≈26px）→ 40px */
+.g-side{position:absolute;top:40px;width:114px;font-family:var(--sf);
+  font-size:10.5px;line-height:1.5;color:#8E8E95;letter-spacing:.01em}
+.g-memo{left:16px}
+.g-gloss{right:16px;text-align:right}
+.g-side>b{display:block;font-size:8.5px;font-weight:600;letter-spacing:.16em;
+  color:#6A6A72;margin-bottom:7px}
+.g-side div{margin-bottom:8px;border-left:1.5px solid #2E2E34;padding-left:7px}
+.g-gloss div{border-left:0;border-right:1.5px solid #2E2E34;padding-left:0;padding-right:7px}
+.g-side i{display:block;font-style:normal;font-size:9px;color:#66666D;margin-top:1px;
+  letter-spacing:.01em}
+
+.g-rows{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;
+  justify-content:flex-start;padding:0 32px;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 30px),transparent 100%);
+          mask-image:linear-gradient(to bottom,#000 0,#000 calc(100% - 30px),transparent 100%)}
+/* 内容起点：居中往下约 1/4 屏高。三组不必全进画面（Ranger 03:36 定），
+   第三组该被下缘吃掉就被吃掉，不为它抬位置 */
+.g-spacer{flex:0 0 auto;height:66%}
+/* 块左右居中（margin auto），文字左对齐；缩放锚点在最左边，旧句下移后仍与新句左对齐 */
+.g-group{display:block;width:100%;max-width:var(--g-width);align-self:center;margin:0 auto;padding-top:4px;
+  transform-origin:left center;
+  transition:transform var(--roll) cubic-bezier(.22,.9,.25,1),
+             opacity   var(--roll) ease,
+             margin    var(--roll) cubic-bezier(.22,.9,.25,1)}
+.g-group .gz{font-size:var(--g-zh);line-height:1.36;font-weight:700;color:var(--ink);
+  letter-spacing:-.01em;text-align:left;margin:0}
+.g-group .ge{font-size:var(--g-en);line-height:1.45;color:var(--dim);text-align:left;margin:2px 0 0}
+
+/* 演示控制条（不属于界面） */
+.devbar{width:268px;flex:0 0 auto;font-size:12px;color:#8B8B92;line-height:1.7}
+.devbar h1{font-size:14px;color:#E8E8EC;margin:0 0 8px;font-weight:700}
+.devbar button{font:inherit;font-size:12px;padding:7px 12px;border-radius:8px;
+  border:1px solid #3A3A40;background:#232327;color:#DCDCE2;cursor:pointer;margin:0 6px 8px 0}
+.devbar button:hover{background:#2E2E34}
+.devbar .hint{color:#6E6E76;font-size:11.5px;margin-top:10px}
+.devbar b{color:#B9B9C2;font-weight:600}
+
+@keyframes blink{50%{opacity:0}}
+
+/* ══ B3：白底青字 · 非像素字体 ══
+   与 B2 同一套配色（白底 + 青），但不使用点阵字体、不铺点阵栅格——
+   B2 的"像素感"来自字体与栅格，抽掉这两样，它才看得出是同一族里的"现代版" */
+:root{
+  --bg:#FFFFFF; --ink:#45B787; --dim:#2E8A63; --hair:rgba(69,183,135,.40);
+  --yellow:#D98A1F; --blue:#1E8FA8;
+  --sf:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --fade-line:22px;
+}
+html,body{background:#E7F0EB}
+body{color:#3E9C74}
+.phone{background:var(--bg);border-color:#CFE6DC;border-radius:16px;
+  box-shadow:0 16px 44px rgba(40,90,70,.18)}
+/* 分界：青绿点划线（保留"点阵"的意思，但不铺满屏） */
+.divider{background-image:linear-gradient(to right,var(--hair) 0 6px,transparent 6px 13px);
+  background-size:13px 1px}
+.divider i{background:#8FCDB6}
+/* 正文：色号全部照抄 B2 —— 主字 #45B787、副行 #2E8A63（2026-11-04 07:5x Ranger 定）*/
+.pane-mine .row.zh{font-weight:700;letter-spacing:-.012em;color:var(--ink);line-height:1.36}
+.pane-mine .row.en{color:var(--dim);font-size:16px}
+.pane-other .row{font-weight:700;letter-spacing:-.01em;color:var(--ink);line-height:1.32}
+.cap,.footer{color:#3E9C74;font-family:var(--sf)}
+.dot{background:#8FCDB6}
+/* 眼镜：纯黑 + 亮青 */
+.glasses{background:#000;border-color:#1E2E28;box-shadow:0 16px 44px rgba(0,0,0,.6)}
+.g-hud{color:#B9FFE0;font-size:11.5px}
+.g-side{color:#5FBF97}
+.g-side>b{color:#43A57E}
+.g-side div{border-color:rgba(140,245,196,.26)}
+.g-batt{border-color:#43A57E}.g-batt::after{background:#43A57E}
+.glasses .g-group .gz{color:#8CF5C4;font-weight:700}
+.glasses .g-group .ge{color:#4FD8A6}
+.devbar h1{color:#2A6B50}
+.devbar{color:#4E8A70}.devbar .hint{color:#6E9C86}.devbar b{color:#2E8A63}
+
+
+/* 电量块与电池框同色（原来是白块 #D6D6DB，跟框色不匹配） */
+.g-batt i{background:#43A57E}
+
+/* ══════════════ 眼镜屏四角括号（2026-11-04 06:5x Ranger 定）══════════════
+   等价于「时间小时位两数字的重心 = 左上括号两条直角边各自垂直平分线的交点」：
+   括号边长 fl 取小时位的字高（成正方形），角点落在 (hx - fl/2, hy - fl/2)，
+   于是两条腿的垂直平分线正好交在小时位中心。--fx/--fy/--fl 由 JS 量出来。
+   ───────────────────────────────────────────────────────────────────── */
+.glasses{position:relative}
+.glasses::before{content:"";position:absolute;z-index:9;pointer-events:none;
+  left:var(--fx,16px);top:var(--fy,16px);right:auto;bottom:auto;
+  width:calc(100% - var(--fx,16px) - var(--fx,16px));
+  height:calc(100% - var(--fy,14px) - var(--fy,14px));
+  background:
+    linear-gradient(var(--gframe),var(--gframe)) left top/var(--fl,18px) 1.4px no-repeat,
+    linear-gradient(var(--gframe),var(--gframe)) left top/1.2px var(--fl,18px) no-repeat,
+    linear-gradient(var(--gframe),var(--gframe)) right top/var(--fl,18px) 1.4px no-repeat,
+    linear-gradient(var(--gframe),var(--gframe)) right top/1.2px var(--fl,18px) no-repeat,
+    linear-gradient(var(--gframe),var(--gframe)) left bottom/var(--fl,18px) 1.4px no-repeat,
+    linear-gradient(var(--gframe),var(--gframe)) left bottom/1.2px var(--fl,18px) no-repeat,
+    linear-gradient(var(--gframe),var(--gframe)) right bottom/var(--fl,18px) 1.4px no-repeat,
+    linear-gradient(var(--gframe),var(--gframe)) right bottom/1.2px var(--fl,18px) no-repeat;
+  --gframe:rgba(143,235,198,0.55)}
+
+
+/* ══ 飞字（与 B5 同一套实现）：字符从对面那栏起飞、途中转 180°、全程 70% ══ */
+.flyer{position:absolute;z-index:30;pointer-events:none;white-space:pre;
+  will-change:transform,font-size;transform-origin:center;overflow:visible}
+.ch{display:inline}
+.ph{display:inline-block;width:0;height:1em;vertical-align:-.16em}
+</style>
+</head>
+<body data-turn="zh" data-state="idle">
+
+<div class="phone">
+  <div class="cap cap-other"><span id="capTxt">translating</span><i class="dot"></i></div>
+  <div class="pane pane-other" id="paneOther"></div>
+  <div class="divider"><i></i></div>
+  <div class="pane pane-mine" id="paneMine"></div>
+  <div class="footer" id="footer">
+    <span id="stL">待命</span>
+    <i class="dot"></i>
+    <span class="r" id="stR">眼镜未连接</span>
+  </div>
+</div>
+
+<div class="glasses">
+  <div class="g-hud"><span id="gTime">22:14</span><span class="g-batt"><i></i></span></div>
+  <div class="g-side g-memo">
+    <b>MEMO</b>
+    <div>报价 3.2<i>USD/件</i></div>
+    <div>封样 ×2<i>待确认</i></div>
+    <div>目标<i>确认抽样与交期</i></div>
+  </div>
+  <div class="g-side g-gloss">
+    <b>GLOSSARY</b>
+    <div>公差<i>tolerance</i></div>
+    <div>封样<i>seal sample</i></div>
+  </div>
+  <div class="g-rows" id="gRows"><div class="g-spacer"></div></div>
+</div>
+
+<div class="devbar">
+  <h1>皮肤 B3 · 白底青字</h1>
+  <button id="btnPlay">▶ 重播演示</button>
+  <button id="btnFly">飞字：开</button>
+  <button id="btnVol">模拟音量 40%</button>
+  <div class="hint">
+    · 英语字幕<b>两侧同时</b>出，中文译文延后 700ms<br>
+    · 旧句<b>左对齐</b>，逐行 <b>80% → 50%</b>（先快后慢），<b>不做事先淡化</b><br>
+    · 英/中各算一行，阶梯更细、过渡更顺<br>
+    · 光标贴在<b>下一个字的方格左边</b>，宽度 0 不挤字<br>
+    · 亮点随回合：<b>黄 = 中文</b> / <b>蓝 = 英语</b>，紧跟状态语<br>
+    · 手机旧字幕：大小 <b>80%→50%</b>，不透明 <b>90%→60%</b><br>
+    · 眼镜端：<b>1/2 屏宽</b>、中文 12.8px、<b>只留三组</b>（100 / 80 / 60）<br>
+    · 眼镜 HUD：时间电量在<b>左上角</b>、左 MEMO（含目标）/ 右 GLOSSARY
+  </div>
+</div>
+
+<script>
+const TURNS = [
+  {lang:"zh", say:"可以重新抽样，但实验室要三个工作日。",
+              tr :"We can re-sample, but the lab needs three working days."},
+  {lang:"zh", say:"三个工作日可以接受，能不能先把不合格的两项封样？",
+              tr :"Three working days works. Could you seal the two failed items first?"},
+  {lang:"en", say:"Two items in this batch are out of tolerance.",
+              tr :"这批货有两项指标超出公差。"},
+  {lang:"en", say:"We can ship the replacement by Friday.",
+              tr :"替换品我们周五前能发出去。"},
+  {lang:"zh", say:"那批货的检验报告我们先发你邮箱，明早补一份正式的中文版。",
+              tr :"We will email you the inspection report first, and send the official Chinese version tomorrow morning."},
+  {lang:"en", say:"Perfect. And please mark the two failed samples clearly.",
+              tr :"好极了。另外请把两个不合格样品标注清楚。"}
+];
+
+const paneOther = document.getElementById("paneOther");
+const paneMine  = document.getElementById("paneMine");
+const gRows     = document.getElementById("gRows");
+const stL = document.getElementById("stL"), stR = document.getElementById("stR");
+const capTxt = document.getElementById("capTxt");
+const footer = document.getElementById("footer");
+const body = document.body;
+
+const ZH_SPEED = 55;      // 中文逐字速度
+const EN_SPEED = 20;      // 英文逐字速度
+const LAG = 700;          // 翻译延时：译文比原话晚这么久开始流
+
+let timers = [];
+const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
+const clearAll = () => { timers.forEach(clearTimeout); timers = []; };
+
+/* ── 历史递减阶梯（按“行”算，不按“句”算）─────────────────
+   i = 该行距离当前句的行数（0 = 最新那一行）
+   0/1 两行属于当前句，保持 100%；
+   从第 3 行（i=2）起 80% 起步，非线性收敛到 50%：先快后慢。 */
+function ladderScale(i, cur){
+  const j = i - cur;                       // j = 从当前句往外数的第几行（0 = 第一行历史）
+  if (j < 0) return 1;
+  return 0.50 + 0.30 * Math.exp(-0.45 * j);
+}
+/* 2026-11-04 03:27：当前句 100%；旧字幕第一行 90%，一路收敛到尾行 60% */
+function ladderOpacity(i, cur, isOther){
+  const j = i - cur;
+  if (j < 0) return 1;
+  if (isOther) return 0.50 + 0.30 * Math.exp(-0.40 * j);
+  return 0.60 + 0.30 * Math.exp(-0.40 * j);
+}
+
+/* 缩放不改字号 → 断行位置完全不变；负 margin 把缩掉的高度还给布局，历史才能紧凑堆到线前 */
+function applyScale(el, k, o){
+  el.style.transform = `scale(${k})`;
+  el.style.opacity = String(o);
+  const h = el.offsetHeight;
+  const d = (k > 0.999) ? 0 : (-h * (1 - k) / 2 + 1.5);   // +1.5 → 相邻两行之间留 3px 呼吸
+  el.style.marginTop = d + "px";
+  el.style.marginBottom = d + "px";
+}
+
+/* 手机端：从“当前句”那一侧往外数，逐行套阶梯 */
+function relayout(pane){
+  const mine = pane.classList.contains("pane-mine");
+  const rows = [...pane.querySelectorAll(".row")];
+  if (mine) rows.reverse();                 // 我方 DOM 是旧→新，需倒过来数
+  const cur = mine ? 2 : 1;                 // 当前句占几行：我方 中+英 = 2，对方 只有英 = 1
+  rows.forEach((r, i) => {
+    if (i > 15) { r.remove(); return; }     // 早被遮罩吃掉，别让它无限长
+    applyScale(r, ladderScale(i, cur), ladderOpacity(i, cur, !mine));
+  });
+}
+
+/* 眼镜端：只留两级（当前 100% / 上一句 60%·75%），越界的直接移出下缘 */
+function relayoutGlass(){
+  const GL_HIST = 2;                             // 只显示三组 = 当前句 + 2 句历史
+  const all = [...gRows.querySelectorAll(".g-group")];
+  all.forEach((g, i) => {
+    if (i > GL_HIST) { g.remove(); return; }     // 第四组及以后直接去掉
+    const j = i - 1;                             // j<0 = 当前句
+    if (j < 0) { applyScale(g, 1, 1); return; }
+    // 只有三组，指数收敛的末值到不了 60%，所以尺寸与不透明度共用同一条三点线：
+    // 当前 100/100 → 上一句 80/80 → 再上一句 60/60 → 消失
+    const k = 0.80 - 0.20 * (j / (GL_HIST - 1));
+    const o = 0.80 - 0.20 * (j / (GL_HIST - 1));
+    applyScale(g, k, o);
+  });
+}
+
+/* ── 同时驱动多个目标逐字出字（保证两侧字幕一字不差地同步）── */
+const phoneEl = document.querySelector(".phone");
+
+function insertCh(el, ch, ref){
+  const sp = document.createElement("span");
+  sp.className = "ch";
+  sp.textContent = ch;
+  el.insertBefore(sp, ref);
+  return sp;
+}
+
+/* 飞字开关（Ranger 06:5x：做成单独可开关的功能）：?fly=0 关闭，页面按钮也能切。
+   有飞字 → 关光标；没飞字 → 开光标。 */
+let FLY = location.search.indexOf("fly=0") < 0;
+
+/* 一个字符从 src 飞到 dst：途中转 180°、全程 70% 不透明。
+   落点用「目标字符盒」直接定位，落地时 transform 归零，所以不会「出发准、到达偏一行」。 */
+const FLY_MS = 420;
+const FLY_LIFT = 16;                        // 飞行途中往上抬一点，走一条小弧线
+
+function flyOne(ch, cfg, spans){
+  const src = spans[cfg.from];
+  cfg.to.forEach(k => {
+    const dst = spans[k];
+    if (!dst || dst === src) return;
+
+    const cs0 = getComputedStyle(src), cs1 = getComputedStyle(dst);
+    const f = document.createElement("span");
+    f.className = "flyer";
+    f.textContent = ch;
+    f.style.fontFamily = cs1.fontFamily;
+    f.style.fontWeight = cs1.fontWeight;
+    f.style.color = cs1.color;
+    f.style.left = "0";
+    f.style.top  = "0";
+    phoneEl.appendChild(f);
+
+    const fs0 = parseFloat(cs0.fontSize), fs1 = parseFloat(cs1.fontSize);
+    const r0 = cfg.dir > 0 ? 180 : 0, r1 = cfg.dir > 0 ? 0 : 180;
+    dst.style.opacity = "0";
+
+    /* 每一帧重新量一次：一是手机有 10px 边框，绝对定位以 padding box 为原点、
+       getBoundingClientRect 以 border box 为原点，不扣掉就整体偏 10px；
+       二是飞的过程中句子会换行、整行上移，只算一次起始差就会「落地偏一行」。
+       两笔都在帧里算掉，落地必然与目标字符重合。 */
+    const pcs = getComputedStyle(phoneEl);
+    const bl = parseFloat(pcs.borderLeftWidth) || 0;
+    const bt = parseFloat(pcs.borderTopWidth)  || 0;
+    const t0 = performance.now();
+    /* 兜底：标签页切到后台时 rAF 会停，飞字会冻在半空、目标字符一直透明。
+       加一条定时兜底，最多 3 倍时长强制落地，不留隐形字。 */
+    const safety = setTimeout(() => {
+      if (!f.isConnected) return;
+      f.remove();
+      if (dst.isConnected) dst.style.opacity = "";
+    }, FLY_MS * 3);
+
+    const frame = (t) => {
+      if (!dst.isConnected || !f.isConnected) { f.remove(); return; }
+      const p = Math.min(1, (t - t0) / FLY_MS);
+      const e = 1 - Math.pow(1 - p, 3);              // 缓出
+      const a  = src.getBoundingClientRect();
+      const b  = dst.getBoundingClientRect();
+      const pr = phoneEl.getBoundingClientRect();
+      const sx = a.left - pr.left - bl + a.width  / 2;
+      const sy = a.top  - pr.top  - bt + a.height / 2;
+      const bx = b.left - pr.left - bl + b.width  / 2;
+      const by = b.top  - pr.top  - bt + b.height / 2;
+
+      f.style.width      = b.width  + "px";
+      f.style.height     = b.height + "px";
+      f.style.lineHeight = b.height + "px";          // 行盒 = 目标字高 → 基线与目标同一套
+      f.style.fontSize   = (fs0 + (fs1 - fs0) * e) + "px";
+      f.style.opacity    = ".7";                     // 飞行途中 70%（他定）
+      const x = sx + (bx - sx) * e;
+      const y = sy + (by - sy) * e - Math.sin(Math.PI * e) * FLY_LIFT;
+      f.style.transform =
+        `translate(${x.toFixed(2)}px,${y.toFixed(2)}px) translate(-50%,-50%) rotate(${(r0 + (r1 - r0) * e).toFixed(1)}deg)`;
+
+      if (p < 1) requestAnimationFrame(frame);
+      else { clearTimeout(safety); dst.style.opacity = ""; f.remove(); }
+    };
+    requestAnimationFrame(frame);
+  });
+}
+
+function typeAll(els, text, speed, done, flyCfg){
+  if (!els.length) { done && done(); return; }
+  els.forEach(el => { el.textContent = ""; });
+  /* 有飞字 → 不建光标（字自己在飞，再挂一根光标只会打架）；没飞字 → 光标照旧 */
+  const carets = els.map(el => {
+    if (FLY) return null;
+    const c = document.createElement("span");
+    c.className = "caret";
+    el.appendChild(c);
+    return c;
+  });
+  let i = 0;
+  const tick = () => {
+    if (i >= text.length) { carets.forEach(c => c && c.remove()); done && done(); return; }
+    const ch = text.charAt(i++);
+    const spans = els.map((el, k) => insertCh(el, ch, carets[k]));
+    if (flyCfg) flyOne(ch, flyCfg, spans);
+    later(tick, speed);
+  };
+  tick();
+}
+
+function pendingCaret(el){
+  /* 译文那行要空 700ms 等翻译；飞字模式不出光标，但行高还是得先占住，
+     否则中文一到，整句会往下跳一下。用一个看不见的 0 宽占位撑住 1em。 */
+  const c = document.createElement("span");
+  c.className = FLY ? "ph" : "caret";
+  el.appendChild(c);
+}
+
+function rowEl(cls){
+  const r = document.createElement("div");
+  r.className = "row " + cls;
+  return r;
+}
+
+/* 我方一句 = 中文行 + 英文行 */
+function newTurnMine(){
+  const t = document.createElement("div");
+  t.className = "turn";
+  const zh = rowEl("zh"), en = rowEl("en");
+  t.appendChild(zh); t.appendChild(en);
+  paneMine.appendChild(t);
+  return {zh, en};
+}
+/* 对方一句 = 一行英文，出生即倒转（不会再出现“先朝我们、再翻过去”的那一帧） */
+function newTurnOther(){
+  const t = document.createElement("div");
+  t.className = "turn";
+  const row = rowEl("en");
+  const flip = document.createElement("div");
+  flip.className = "flip";
+  row.appendChild(flip);
+  t.appendChild(row);
+  paneOther.insertBefore(t, paneOther.firstChild);
+  return flip;
+}
+/* 眼镜一句 = 中文行 + 英文行 */
+function newTurnGlass(){
+  const g = document.createElement("div");
+  g.className = "g-group";
+  const gz = document.createElement("div"); gz.className = "gz";
+  const ge = document.createElement("div"); ge.className = "ge";
+  g.appendChild(gz); g.appendChild(ge);
+  gRows.insertBefore(g, gRows.children[1] || null);
+  return {gz, ge};
+}
+
+function runTurn(turn, done){
+  const isZh = turn.lang === "zh";
+  body.dataset.turn = turn.lang;
+  body.dataset.state = "listening";
+  stL.textContent  = isZh ? "正在听 · 中文" : "正在听 · 英语";
+  capTxt.textContent = isZh ? "translating" : "listening";
+  footer.classList.toggle("alert", lowVolume);
+
+  const mine  = newTurnMine();
+  const other = newTurnOther();
+  const glass = newTurnGlass();
+
+  const zhText = isZh ? turn.say : turn.tr;    // 中文：我方主行 + 眼镜中文行
+  const enText = isZh ? turn.tr  : turn.say;   // 英文：我方副行 + 对方整句 + 眼镜英文行
+
+  // 译文那一行先占住高度（英语回合时中文行要等 700ms，不能塌成 0 高）
+  pendingCaret(isZh ? mine.en : mine.zh);
+  pendingCaret(isZh ? glass.ge : glass.gz);   // 眼镜端译文行同样先占位，迟到时不跳
+
+  relayout(paneMine);
+  relayout(paneOther);
+  relayoutGlass();
+
+  // 原话（说的人立刻出字） / 译文（延时 700ms 才开始）
+  const speechEls = isZh ? [mine.zh, glass.gz]  : [mine.en, other, glass.ge];
+  const transEls  = isZh ? [mine.en, other, glass.ge] : [mine.zh, glass.gz];
+
+  let pending = 2;
+  const onStreamDone = () => {
+    if (--pending) return;
+    stL.textContent = "翻译完成 · 已朗读";
+    body.dataset.state = "idle";
+    later(done, 1400);
+  };
+
+  typeAll(speechEls, isZh ? zhText : enText, isZh ? ZH_SPEED : EN_SPEED, onStreamDone,
+          (FLY && !isZh) ? { from: 1, to: [0], dir: 1 } : null);
+  later(() => typeAll(transEls, isZh ? enText : zhText, isZh ? EN_SPEED : ZH_SPEED, onStreamDone,
+          (FLY && isZh) ? { from: 0, to: [1], dir: -1 } : null), LAG);
+}
+
+let playing = false;
+function play(){
+  clearAll();
+  document.querySelectorAll(".flyer").forEach(n => n.remove());   // 清掉上一轮还在飞的字符
+  paneMine.innerHTML = ""; paneOther.innerHTML = "";
+  gRows.innerHTML = '<div class="g-spacer"></div>';
+  let i = 0;
+  const step = () => {
+    if (i >= TURNS.length) { stL.textContent = "演示结束 · 点重播"; playing = false; return; }
+    runTurn(TURNS[i++], () => { if (playing) step(); });
+  };
+  playing = true;
+  step();
+}
+
+let lowVolume = false;
+document.getElementById("btnVol").onclick = (e) => {
+  lowVolume = !lowVolume;
+  e.target.textContent = lowVolume ? "恢复音量 80%" : "模拟音量 40%";
+  stR.textContent = lowVolume ? "音量过低 · 对方可能听不清" : "眼镜未连接";
+  footer.classList.toggle("alert", lowVolume);
+};
+document.getElementById("btnPlay").onclick = () => play();
+document.getElementById("btnFly").onclick = (e) => {
+  FLY = !FLY;
+  e.target.textContent = "飞字：" + (FLY ? "开" : "关");
+  play();                                   // 切换后从头演示，好对比两种手感
+};
+document.getElementById("btnFly").textContent = "飞字：" + (FLY ? "开" : "关");
+
+if (location.search.indexOf("vol=1") >= 0) {
+  setTimeout(() => {
+    lowVolume = true;
+    stR.textContent = "音量过低 · 对方可能听不清";
+    footer.classList.add("alert");
+  }, 300);
+}
+
+/* 左上角时间：24 小时制，跟系统走（V1 是写死的 22:14） */
+function tickClock(){
+  const d = new Date();
+  const el = document.getElementById("gTime");
+  if (el) el.textContent = String(d.getHours()).padStart(2, "0") + ":" +
+                           String(d.getMinutes()).padStart(2, "0");
+}
+
+/* 四角括号对齐：括号边长取小时位字高，角点让两条腿的垂直平分线交在小时位重心 */
+function alignGlassFrame(){
+  const gl  = document.querySelector(".glasses");
+  const hud = document.querySelector(".g-hud");
+  const t   = document.getElementById("gTime");
+  if (!gl || !t || !t.firstChild) return;
+  const node = t.firstChild;
+  if (node.nodeType !== 3 || node.textContent.length < 2) return;
+
+  /* 1) 先归零再量：否则每调用一次就把位移再叠一层 */
+  if (hud) hud.style.transform = "none";
+
+  const r = document.createRange();
+  r.setStart(node, 0); r.setEnd(node, 2);          // 只取小时位两位数字
+  const h0 = r.getBoundingClientRect();
+  if (!h0.width) return;
+
+  /* 2) 时间 + 电池整体往右下各挪「一个数字 0 的宽度」
+        先单独量第一个字符（小时位首位数字），等宽字体下就是一个字形宽；
+        量不到就退回小时位总宽的一半。右下同量，斜着挪一格。 */
+  r.setEnd(node, 1);
+  const one = r.getBoundingClientRect();
+  r.setEnd(node, 2);
+  const step = one.width > 0.5 ? one.width : h0.width / 2;
+  if (hud) hud.style.transform =
+    "translate(" + step.toFixed(2) + "px," + step.toFixed(2) + "px)";
+
+  /* 3) 位移之后再量一次，让括号继续对齐到新的小时位重心 */
+  const h = r.getBoundingClientRect();
+  const g = gl.getBoundingClientRect();
+  if (!h.width || !g.width) return;
+  /* 边长取 1.6 倍字高：垂直平分线交点仍落在小时位重心（这是硬要求），
+     只是把括号放大一点，免得横线正好压在字头、竖线贴着字边，看着像没有括号 */
+  const fl = Math.max(16, Math.round(h.height * 1.6));
+  gl.style.setProperty("--fl", fl + "px");
+  gl.style.setProperty("--fx", (h.left + h.width / 2 - g.left - fl / 2).toFixed(2) + "px");
+  gl.style.setProperty("--fy", (h.top  + h.height / 2 - g.top  - fl / 2).toFixed(2) + "px");
+}
+
+tickClock(); alignGlassFrame();
+setInterval(() => { tickClock(); alignGlassFrame(); }, 20000);
+window.addEventListener("resize", alignGlassFrame);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignGlassFrame);
+
+
+setTimeout(play, 600);
+</script>
+</body>
+</html>
