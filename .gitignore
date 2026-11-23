@@ -11,3 +11,6 @@ Desktop.ini
 # 本地预览/截图临时产物
 _preview/
 *.tmp
+
+# 脚本变量未展开产生的误产物
+_preview*.png
