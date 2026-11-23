@@ -43,24 +43,75 @@
 
 同一份内容（一批货的验货对话）、同一套动效，只换底色、字族、分界线画法和装饰。
 
-| # | 方案 | 分界线的画法 | 签名元素 | 预览 |
-|---|---|---|---|---|
-| A | 宋版 · 朱印 | 中缝窄空带 + 鱼尾三角 | 纸本双色、版心线 | ![](shots/A-songti.jpg) |
-| B1 | 像素屏 · 深底 | 3×3 点阵点 | 12px 点阵字体 | ![](shots/B-pixel.jpg) |
-| B2 | 像素屏 · 白底 | 3×3 点阵点（绿） | 同上，白底绿字 | ![](shots/B-paper.jpg) |
-| B3 | 白底青字 · 非像素 | 青绿点划线 | 抽掉点阵、换常规字族 | ![](shots/B3-green.jpg) |
-| B4 | B3 + 四角括号 | 点划线 + 四角 HUD 框 | LINK / TRK 读数 | ![](shots/B4-hud.jpg) |
-| B5 | B3 + 飞字 | 字符边飞边转 180° | 传递感 | ![](shots/B5-fly.jpg) |
-| C | 瑞士国际主义 | 刻度短桩 | 1.25 以上字阶、严格栅格 | ![](shots/C-swiss.jpg) |
-| D | 终端 · TUI | 1px 虚线 + 两端竖线 | 全暗色、等宽 | ![](shots/D-tui.jpg) |
-| F | 票根 | 撕票线 + 半圆打孔 | 打孔露出桌面色 | ![](shots/F-ticket.jpg) |
-| G | 字幕台 | hairline + 胶片齿孔 | 历史句被画框边缘切半 | ![](shots/G-caption.jpg) |
-| H | 导视牌 | 海军蓝带 + 黄箭头 | 黄只用于指向，永不进正文 | ![](shots/H-wayfind.jpg) |
-| I | 拼贴剪贴 | 纸缝 + 斜贴胶带 | 牛皮纸桌面 + 白纸面板 | ![](shots/I-collage.jpg) |
-| J | Aicher 奥林匹克 | 六色段细带 | 刻意不用红与金 | ![](shots/J-aicher.jpg) |
-| K | 票根 · 45° | 虚线 + 45° 三角切口 | 只允许 45°/90° | ![](shots/K-ticket45.jpg) |
+| # | 方案 | 分界线的画法 | 签名元素 |
+|---|---|---|---|
+| A | 宋版 · 朱印 | 中缝窄空带 + 鱼尾三角 | 纸本双色、版心线 |
+| B1 | 像素屏 · 深底 | 3×3 点阵点 | 12px 点阵字体 |
+| B2 | 像素屏 · 白底 | 3×3 点阵点（绿） | 同上，白底绿字 |
+| B3 | 白底青字 · 非像素 | 青绿点划线 | 抽掉点阵、换常规字族 |
+| B4 | B3 + 四角括号 | 点划线 + 四角 HUD 框 | LINK / TRK 读数 |
+| B5 | B3 + 飞字 | 字符边飞边转 180° | 传递感 |
+| C | 瑞士国际主义 | 刻度短桩 | 1.25 以上字阶、严格栅格 |
+| D | 终端 · TUI | 1px 虚线 + 两端竖线 | 全暗色、等宽 |
+| F | 票根 | 撕票线 + 半圆打孔 | 打孔露出桌面色 |
+| G | 字幕台 | hairline + 胶片齿孔 | 历史句被画框边缘切半 |
+| H | 导视牌 | 海军蓝带 + 黄箭头 | 黄只用于指向，永不进正文 |
+| I | 拼贴剪贴 | 纸缝 + 斜贴胶带 | 牛皮纸桌面 + 白纸面板 |
+| J | Aicher 奥林匹克 | 六色段细带 | 刻意不用红与金 |
+| K | 票根 · 45° | 虚线 + 45° 三角切口 | 只允许 45°/90° |
 
-`index.html` 是带缩略图的总览页，离线可看。
+### 三·一 逐套看
+
+每张图里都是三样东西并排：左边手机（上屏给对面看，按面对面坐着的人做 180° 旋转；下屏给自己看）、中间 AR 眼镜视野、右边是该皮肤的规格说明面板。点开原图是 1400 px 宽，文字能读。
+
+<table>
+<tr>
+<td width="50%"><img src="shots/A-songti.png" width="100%" alt="A 宋版朱印"><br>
+<b>A · 宋版 · 朱印</b>　纸本双色，界行与鱼尾照宋刻本，朱印只给「正在说」</td>
+<td width="50%"><img src="shots/B-pixel.png" width="100%" alt="B1 像素屏深底"><br>
+<b>B1 · 像素屏 · 深底</b>　12 px 点阵字体，分界线用 3×3 实心点而不是线</td>
+</tr>
+<tr>
+<td><img src="shots/B-paper.png" width="100%" alt="B2 像素屏白底"><br>
+<b>B2 · 像素屏 · 白底</b>　同一套点阵搬到纸上，绿点划线接缝</td>
+<td><img src="shots/B3-green.png" width="100%" alt="B3 白底青字"><br>
+<b>B3 · 白底青字</b>　抽掉点阵换常规字族，证明「像素感」是可拆的一层</td>
+</tr>
+<tr>
+<td><img src="shots/B4-hud.png" width="100%" alt="B4 四角括号"><br>
+<b>B4 · B3 + 四角括号</b>　加四角 HUD 框与 LINK / TRK 读数，多一层设备感</td>
+<td><img src="shots/B5-fly.png" width="100%" alt="B5 飞字"><br>
+<b>B5 · B3 + 飞字</b>　字符从对面那侧起飞、边飞边转 180°，落到目标行</td>
+</tr>
+<tr>
+<td><img src="shots/C-swiss.png" width="100%" alt="C 瑞士国际主义"><br>
+<b>C · 瑞士国际主义</b>　严格栅格、字阶 1.25 以上，分界线是刻度短桩</td>
+<td><img src="shots/D-tui.png" width="100%" alt="D 终端 TUI"><br>
+<b>D · 终端 · TUI</b>　全暗色等宽，1 px 虚线加两端竖线，像 tmux 分屏</td>
+</tr>
+<tr>
+<td><img src="shots/F-ticket.png" width="100%" alt="F 票根"><br>
+<b>F · 票根</b>　撕票线 + 两侧半圆打孔，打孔处真的透出桌面色</td>
+<td><img src="shots/G-caption.png" width="100%" alt="G 字幕台"><br>
+<b>G · 字幕台</b>　胶片齿孔边框，历史句被画框边缘切掉一半</td>
+</tr>
+<tr>
+<td><img src="shots/H-wayfind.png" width="100%" alt="H 导视牌"><br>
+<b>H · 导视牌</b>　黄色只用于指向对方，永不进正文——机场导视的规矩</td>
+<td><img src="shots/I-collage.png" width="100%" alt="I 拼贴剪贴"><br>
+<b>I · 拼贴剪贴</b>　牛皮纸桌面 + 白纸面板，纸缝与斜贴胶带</td>
+</tr>
+<tr>
+<td><img src="shots/J-aicher.png" width="100%" alt="J Aicher 奥林匹克"><br>
+<b>J · Aicher 奥林匹克</b>　六色段细带，刻意不用红与金</td>
+<td><img src="shots/K-ticket45.png" width="100%" alt="K 票根 45 度"><br>
+<b>K · 票根 · 45°</b>　三角切口只允许 45° 与 90°，不许随手斜</td>
+</tr>
+</table>
+
+`index.html` 是带缩略图的总览页，离线可看。上面这些图不是手工截的，
+`tools/shoot_shots.py` 一条命令重出 14 张（起本地服务 → Edge headless 逐页截图 → 裁掉页边空白），
+改完皮肤重跑一次即可，见第九节。
 
 ---
 
@@ -195,20 +246,28 @@ document.createRange().getClientRects()    // → 逐行 top/bottom/left/right
 index.html              14 套方案总览（缩略图内嵌，505 KB）
 skins/A-songti.html     单套原型，每个文件 665~755 行，自包含
 skins/K-ticket45.html
-shots/*.jpg             各方案首屏截图，19~30 KB
+shots/*.png             各方案三端同框展示图，1400×900 上下，150~330 KB
 _skipped/README.md      淘汰方案（E）的判定记录
 THIRD-PARTY.md          第三方字体许可
 tools/probe_layout.py   14 页排版体检：水平溢出 / 行间真交叠 / 碎片行
+tools/shoot_shots.py    14 张展示图重出：起服务 → 逐页截图 → 裁页边空白
 ```
 
-体检脚本需要本机 Edge，跑法：
+两个脚本都需要本机 Edge，跑法：
 
 ```bash
-python -m http.server 8137        # 仓库根目录起服务
+python -m http.server 8137        # 仓库根目录起服务（probe_layout.py 需要）
 python tools/probe_layout.py      # 输出每页行数、交叠数、溢出元素
+python tools/shoot_shots.py       # 重出 shots/ 下 14 张图，自带服务不用另起
 ```
 
-当前结果：14 个页面 `frag=0 overlap=0 overflow=-`，0 / 14 有问题。
+`probe_layout.py` 当前结果：14 个页面 `frag=0 overlap=0 overflow=-`，0 / 14 有问题。
+
+`shoot_shots.py` 里有两个非显然的坑，写在脚本注释里也在这里留一句：演示是循环动画，
+直接截会截到"说到一半、散字浮在半空"的中间帧，所以要给临时副本注入收尾脚本、
+把动画推到终态并让滚动容器归零，用 40 s 虚拟时间预算跑完再截；
+截完不能直接存，页面底部有大片背景色，得按"与四角背景色差异 > 6"取包围盒裁掉，
+否则图里一半是空的。
 
 皮肤编号里没有 E：第一批的 E（构成主义·斜轴）被放弃，斜轴 −5° 会划过对方那栏最后一行字，且红块压住深色正文不可读（对比度约 2.1:1）。判定过程写在 `_skipped/README.md`，成品不入库。
 
